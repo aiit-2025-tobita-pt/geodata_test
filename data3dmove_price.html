@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>千葉県 地価3D表示</title>
+    <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@deck.gl/carto@8.9.26/dist.min.js"></script>
+    <style>
+      body { margin: 0; }
+      #map { width: 100vw; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      const POLYGON_DATA_URL = 'https://aiit-2025-tobita-pt.github.io/geodata_test/data/export_land_price.geojson';
+
+      fetch(POLYGON_DATA_URL)
+        .then(res => res.json())
+        .then(data => {
+          const features = data.features.filter(f =>
+            f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'
+          );
+
+          const coords = features.flatMap(f =>
+            f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0]
+          );
+          const lats = coords.map(c => c[1]);
+          const lngs = coords.map(c => c[0]);
+          const avgLat = lats.reduce((a, b) => a + b) / lats.length;
+          const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
+
+          const deckgl = new deck.DeckGL({
+            container: 'map',
+            initialViewState: {
+              latitude: avgLat,
+              longitude: avgLng,
+              zoom: 10,
+              pitch: 60,
+              bearing: 0
+            },
+            controller: true,
+            layers: [
+              new deck.TileLayer({
+                id: 'tile-layer',
+                data: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                minZoom: 0,
+                maxZoom: 19,
+                tileSize: 256,
+                renderSubLayers: props => {
+                  const {
+                    bbox: { west, south, east, north }
+                  } = props.tile;
+                  return new deck.BitmapLayer(props, {
+                    data: null,
+                    image: props.data,
+                    bounds: [west, south, east, north]
+                  });
+                }
+              }),
+              new deck.PolygonLayer({
+                id: 'land-price',
+                data: features,
+                pickable: true,
+                extruded: true,
+                wireframe: false,
+                filled: true,
+                stroked: false,
+                getPolygon: f => {
+                  const type = f.geometry.type;
+                  if (type === 'Polygon') return f.geometry.coordinates;
+                  if (type === 'MultiPolygon') return f.geometry.coordinates[0];
+                  return [];
+                },
+                getElevation: f => {
+                  const val = f.properties.land_price_yen;
+                  return val ? val / 20 : 0; // 5倍くらい
+                },
+                getFillColor: f => {
+                  const val = f.properties.land_price_yen;
+                  if (val == null) return [200, 200, 200, 80];
+                  if (val < 100000) return [0, 100, 255, 100];
+                  if (val < 200000) return [0, 200, 100, 100];
+                  if (val < 300000) return [255, 255, 0, 100];
+                  if (val < 400000) return [255, 150, 0, 100];
+                  return [255, 0, 0, 100];
+                }
+              })
+            ]
+          });
+        });
+    </script>
+  </body>
+</html>
