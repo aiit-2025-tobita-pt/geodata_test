@@ -86,7 +86,7 @@
             const lats = coords.map(p => p[1]);
             const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
             const avgLat = lats.reduce((a, b) => a + b) / lats.length;
-            return { position: [avgLng, avgLat, 300000] }; // 上空へ
+            return { position: [avgLng, avgLat, 3000] }; // 上空へ
           });
 
           const tileLayer = new deck.TileLayer({
