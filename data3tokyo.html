@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>東京 NDVI立体 + CO?アニメ</title>
+    <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
+    <style>
+      body { margin: 0; }
+      #map { width: 100vw; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      const GEOJSON_URL = 'https://aiit-2025-tobita-pt/geodata_test/main/data/tokyo_ndvi_polygon_dummy_2023.geojson';
+      const ICON_URL = 'https://aiit-2025-tobita-pt.github.io/geodata_test/data/co2.png';
+
+      const iconMapping = {
+        co2: { x: 0, y: 0, width: 512, height: 512, anchorY: 512, mask: false }
+      };
+
+      let scale = 1;
+      let increasing = true;
+      let deckgl;
+
+      function createIconLayer(scale, co2Data) {
+        return new deck.IconLayer({
+          id: 'co2-icons',
+          data: co2Data,
+          iconAtlas: ICON_URL,
+          iconMapping: iconMapping,
+          getIcon: () => 'co2',
+          sizeScale: scale,
+          getPosition: d => d.position,
+          getSize: () => 60,
+          billboard: true
+        });
+      }
+
+      function animate(co2Data, tileLayer, ndviLayer) {
+        scale += increasing ? 0.03 : -0.03;
+        if (scale >= 2) increasing = false;
+        if (scale <= 1) increasing = true;
+
+        const iconLayer = createIconLayer(scale, co2Data);
+
+        deckgl.setProps({
+          layers: [
+            tileLayer,
+            ndviLayer,
+            iconLayer
+          ]
+        });
+
+        requestAnimationFrame(() => animate(co2Data, tileLayer, ndviLayer));
+      }
+
+      fetch(GEOJSON_URL)
+        .then(res => res.json())
+        .then(data => {
+          const polygons = data.features;
+
+          const ndviLayer = new deck.PolygonLayer({
+            id: 'ndvi-layer',
+            data: polygons,
+            extruded: true,
+            pickable: true,
+            wireframe: false,
+            filled: true,
+            getPolygon: f => f.geometry.coordinates,
+            getElevation: f => f.properties.ndvi ? f.properties.ndvi * 1000 : 0,
+            getFillColor: f => {
+              const v = f.properties.ndvi;
+              if (v == null) return [200, 200, 200, 80];
+              const green = Math.floor(v * 255);
+              return [0, green, 0, 180];
+            }
+          });
+
+          const co2Data = polygons.map(f => {
+            const coords = f.geometry.coordinates[0];
+            const lngs = coords.map(p => p[0]);
+            const lats = coords.map(p => p[1]);
+            const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
+            const avgLat = lats.reduce((a, b) => a + b) / lats.length;
+            return { position: [avgLng, avgLat, 1000] };
+          });
+
+          const tileLayer = new deck.TileLayer({
+            id: 'tile-layer',
+            data: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            minZoom: 0,
+            maxZoom: 19,
+            tileSize: 256,
+            renderSubLayers: props => {
+              const {
+                bbox: { west, south, east, north }
+              } = props.tile;
+              return new deck.BitmapLayer(props, {
+                data: null,
+                image: props.data,
+                bounds: [west, south, east, north]
+              });
+            }
+          });
+
+          deckgl = new deck.DeckGL({
+            container: 'map',
+            initialViewState: {
+              latitude: 35.68,
+              longitude: 139.75,
+              zoom: 9.5,
+              pitch: 60,
+              bearing: 0
+            },
+            controller: true,
+            layers: [
+              tileLayer,
+              ndviLayer,
+              createIconLayer(scale, co2Data)
+            ]
+          });
+
+          animate(co2Data, tileLayer, ndviLayer);
+        });
+    </script>
+  </body>
+</html>
