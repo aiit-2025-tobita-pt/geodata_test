@@ -1,0 +1,115 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "世田谷区",
+        "ndvi": 0.55
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.653, 35.646]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "港区",
+        "ndvi": 0.22
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.751, 35.658]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "練馬区",
+        "ndvi": 0.50
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.654, 35.735]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "八王子市",
+        "ndvi": 0.60
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.339, 35.655]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "立川市",
+        "ndvi": 0.42
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.414, 35.709]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "府中市",
+        "ndvi": 0.39
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.480, 35.672]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "調布市",
+        "ndvi": 0.41
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.538, 35.651]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "町田市",
+        "ndvi": 0.52
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.446, 35.546]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "小金井市",
+        "ndvi": 0.48
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.510, 35.701]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "千代田区",
+        "ndvi": 0.18
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.753, 35.693]
+      }
+    }
+  ]
+}
