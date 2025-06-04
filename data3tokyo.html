@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>東京 NDVI立体 + CO?アニメ</title>
+    <title>東京 NDVI立体 + CO2アニメ</title>
     <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
     <style>
       body { margin: 0; }
@@ -60,25 +60,25 @@
         .then(data => {
           const polygons = data.features;
 
-new deck.PolygonLayer({
-  id: 'ndvi-layer',
-  data: 'tokyo_ndvi_polygon_dummy_2023.geojson',
-  pickable: true,
-  extruded: true,
-  wireframe: false,
-  filled: true,
-  stroked: false,
-  getPolygon: f => {
-    if (f.geometry.type === 'Polygon') return f.geometry.coordinates;
-    if (f.geometry.type === 'MultiPolygon') return f.geometry.coordinates[0];
-    return [];
-  },
-  getElevation: f => f.properties.ndvi_mean * 10000,
-  getFillColor: f => {
-    const ndvi = f.properties.ndvi_mean;
-    return [Math.floor(ndvi * 255), 200, 100, 180];
-  }
-})
+          const ndviLayer = new deck.PolygonLayer({
+            id: 'ndvi-layer',
+            data: polygons,
+            pickable: true,
+            extruded: true,
+            wireframe: false,
+            filled: true,
+            stroked: false,
+            getPolygon: f => {
+              if (f.geometry.type === 'Polygon') return f.geometry.coordinates;
+              if (f.geometry.type === 'MultiPolygon') return f.geometry.coordinates[0];
+              return [];
+            },
+            getElevation: f => f.properties.ndvi_mean * 10000,
+            getFillColor: f => {
+              const ndvi = f.properties.ndvi_mean;
+              return [Math.floor(ndvi * 255), 200, 100, 180];
+            }
+          });
 
           const co2Data = polygons.map(f => {
             const coords = f.geometry.coordinates[0];
