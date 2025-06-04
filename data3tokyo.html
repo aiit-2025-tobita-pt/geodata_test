@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>東京 NDVI立体 + CO2アニメ</title>
+    <title>東京 NDVI立体 + CO₂アニメ</title>
     <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
     <style>
       body { margin: 0; }
@@ -12,7 +12,7 @@
   <body>
     <div id="map"></div>
     <script>
-      const GEOJSON_URL = 'https://raw.githubusercontent.com/aiit-2025-tobita-pt/geodata_test/main/data/tokyo_ndvi_polygon_dummy_2023_2.geojson';
+      const GEOJSON_URL = 'https://aiit-2025-tobita-pt.github.io/geodata_test/data/tokyo_ndvi_polygon_dummy_2023_2.geojson';
       const ICON_URL = 'https://aiit-2025-tobita-pt.github.io/geodata_test/data/co2.png';
 
       const iconMapping = {
@@ -22,38 +22,6 @@
       let scale = 1;
       let increasing = true;
       let deckgl;
-
-      function createIconLayer(scale, co2Data) {
-        return new deck.IconLayer({
-          id: 'co2-icons',
-          data: co2Data,
-          iconAtlas: ICON_URL,
-          iconMapping: iconMapping,
-          getIcon: () => 'co2',
-          sizeScale: scale,
-          getPosition: d => d.position,
-          getSize: () => 60,
-          billboard: true
-        });
-      }
-
-      function animate(co2Data, tileLayer, ndviLayer) {
-        scale += increasing ? 0.03 : -0.03;
-        if (scale >= 2) increasing = false;
-        if (scale <= 1) increasing = true;
-
-        const iconLayer = createIconLayer(scale, co2Data);
-
-        deckgl.setProps({
-          layers: [
-            tileLayer,
-            ndviLayer,
-            iconLayer
-          ]
-        });
-
-        requestAnimationFrame(() => animate(co2Data, tileLayer, ndviLayer));
-      }
 
       fetch(GEOJSON_URL)
         .then(res => res.json())
@@ -86,7 +54,7 @@
             const lats = coords.map(p => p[1]);
             const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
             const avgLat = lats.reduce((a, b) => a + b) / lats.length;
-            return { position: [avgLng, avgLat, 1000] };
+            return { position: [avgLng, avgLat, 3000] };
           });
 
           const tileLayer = new deck.TileLayer({
@@ -107,6 +75,34 @@
             }
           });
 
+          function createIconLayer(scale) {
+            return new deck.IconLayer({
+              id: 'co2-icons',
+              data: co2Data,
+              iconAtlas: ICON_URL,
+              iconMapping: iconMapping,
+              getIcon: () => 'co2',
+              sizeScale: scale * 0.25,
+              getPosition: d => d.position,
+              getSize: () => 30,
+              billboard: true
+            });
+          }
+
+          function animate() {
+            scale += increasing ? 0.03 : -0.03;
+            if (scale >= 2) increasing = false;
+            if (scale <= 1) increasing = true;
+
+            const iconLayer = createIconLayer(scale);
+
+            deckgl.setProps({
+              layers: [tileLayer, ndviLayer, iconLayer]
+            });
+
+            requestAnimationFrame(animate);
+          }
+
           deckgl = new deck.DeckGL({
             container: 'map',
             initialViewState: {
@@ -117,14 +113,10 @@
               bearing: 0
             },
             controller: true,
-            layers: [
-              tileLayer,
-              ndviLayer,
-              createIconLayer(scale, co2Data)
-            ]
+            layers: [tileLayer, ndviLayer, createIconLayer(scale)]
           });
 
-          animate(co2Data, tileLayer, ndviLayer);
+          animate();
         });
     </script>
   </body>
