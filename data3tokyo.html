@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>東京 NDVI立体 + CO2アニメ</title>
+    <title>東京 NDVI立体 + CO₂アイコン</title>
     <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
     <style>
       body { margin: 0; }
@@ -30,9 +30,9 @@
           iconAtlas: ICON_URL,
           iconMapping: iconMapping,
           getIcon: () => 'co2',
-          sizeScale: scale,
+          sizeScale: scale * 0.5, // さらに小さく
           getPosition: d => d.position,
-          getSize: () => 60,
+          getSize: () => 15, // 元々60 → 15に縮小
           billboard: true
         });
       }
@@ -85,47 +85,3 @@
             const lngs = coords.map(p => p[0]);
             const lats = coords.map(p => p[1]);
             const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
-            const avgLat = lats.reduce((a, b) => a + b) / lats.length;
-            return { position: [avgLng, avgLat, 1000] };
-          });
-
-          const tileLayer = new deck.TileLayer({
-            id: 'tile-layer',
-            data: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            minZoom: 0,
-            maxZoom: 19,
-            tileSize: 256,
-            renderSubLayers: props => {
-              const {
-                bbox: { west, south, east, north }
-              } = props.tile;
-              return new deck.BitmapLayer(props, {
-                data: null,
-                image: props.data,
-                bounds: [west, south, east, north]
-              });
-            }
-          });
-
-          deckgl = new deck.DeckGL({
-            container: 'map',
-            initialViewState: {
-              latitude: 35.68,
-              longitude: 139.75,
-              zoom: 9.5,
-              pitch: 60,
-              bearing: 0
-            },
-            controller: true,
-            layers: [
-              tileLayer,
-              ndviLayer,
-              createIconLayer(scale, co2Data)
-            ]
-          });
-
-          animate(co2Data, tileLayer, ndviLayer);
-        });
-    </script>
-  </body>
-</html>
