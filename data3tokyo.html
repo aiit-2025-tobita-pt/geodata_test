@@ -85,3 +85,47 @@
             const lngs = coords.map(p => p[0]);
             const lats = coords.map(p => p[1]);
             const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
+            const avgLat = lats.reduce((a, b) => a + b) / lats.length;
+            return { position: [avgLng, avgLat, 3000] }; // 上空へ
+          });
+
+          const tileLayer = new deck.TileLayer({
+            id: 'tile-layer',
+            data: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            minZoom: 0,
+            maxZoom: 19,
+            tileSize: 256,
+            renderSubLayers: props => {
+              const {
+                bbox: { west, south, east, north }
+              } = props.tile;
+              return new deck.BitmapLayer(props, {
+                data: null,
+                image: props.data,
+                bounds: [west, south, east, north]
+              });
+            }
+          });
+
+          deckgl = new deck.DeckGL({
+            container: 'map',
+            initialViewState: {
+              latitude: 35.68,
+              longitude: 139.75,
+              zoom: 9.5,
+              pitch: 60,
+              bearing: 0
+            },
+            controller: true,
+            layers: [
+              tileLayer,
+              ndviLayer,
+              createIconLayer(scale, co2Data)
+            ]
+          });
+
+          animate(co2Data, tileLayer, ndviLayer);
+        });
+    </script>
+  </body>
+</html>
