@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>東京 NDVI立体 + CO₂アイコン</title>
+    <title>東京 NDVI立体 + CO₂アニメ</title>
     <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
     <style>
       body { margin: 0; }
@@ -12,7 +12,7 @@
   <body>
     <div id="map"></div>
     <script>
-      const GEOJSON_URL = 'https://raw.githubusercontent.com/aiit-2025-tobita-pt/geodata_test/main/data/tokyo_ndvi_polygon_dummy_2023_2.geojson';
+      const GEOJSON_URL = 'https://aiit-2025-tobita-pt.github.io/geodata_test/data/tokyo_ndvi_polygon_dummy_2023_2.geojson';
       const ICON_URL = 'https://aiit-2025-tobita-pt.github.io/geodata_test/data/co2.png';
 
       const iconMapping = {
@@ -30,9 +30,9 @@
           iconAtlas: ICON_URL,
           iconMapping: iconMapping,
           getIcon: () => 'co2',
-          sizeScale: scale * 0.5, // さらに小さく
+          sizeScale: scale * 0.25, // 小さめに表示（1/4）
           getPosition: d => d.position,
-          getSize: () => 60, // 元々60 → 15に縮小
+          getSize: () => 30, // 実サイズ
           billboard: true
         });
       }
@@ -83,49 +83,3 @@
           const co2Data = polygons.map(f => {
             const coords = f.geometry.coordinates[0];
             const lngs = coords.map(p => p[0]);
-            const lats = coords.map(p => p[1]);
-            const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
-            const avgLat = lats.reduce((a, b) => a + b) / lats.length;
-            return { position: [avgLng, avgLat, 3000] }; // 上空へ
-          });
-
-          const tileLayer = new deck.TileLayer({
-            id: 'tile-layer',
-            data: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            minZoom: 0,
-            maxZoom: 19,
-            tileSize: 256,
-            renderSubLayers: props => {
-              const {
-                bbox: { west, south, east, north }
-              } = props.tile;
-              return new deck.BitmapLayer(props, {
-                data: null,
-                image: props.data,
-                bounds: [west, south, east, north]
-              });
-            }
-          });
-
-          deckgl = new deck.DeckGL({
-            container: 'map',
-            initialViewState: {
-              latitude: 35.68,
-              longitude: 139.75,
-              zoom: 9.5,
-              pitch: 60,
-              bearing: 0
-            },
-            controller: true,
-            layers: [
-              tileLayer,
-              ndviLayer,
-              createIconLayer(scale, co2Data)
-            ]
-          });
-
-          animate(co2Data, tileLayer, ndviLayer);
-        });
-    </script>
-  </body>
-</html>
