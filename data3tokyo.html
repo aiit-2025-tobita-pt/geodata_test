@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>東京 NDVI立体 + CO₂アイコン</title>
+    <title>東京 NDVI立体 + CO2アニメ</title>
     <script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.26/dist.min.js"></script>
     <style>
       body { margin: 0; }
@@ -30,9 +30,9 @@
           iconAtlas: ICON_URL,
           iconMapping: iconMapping,
           getIcon: () => 'co2',
-          sizeScale: scale * 0.5, // さらに小さく
+          sizeScale: scale,
           getPosition: d => d.position,
-          getSize: () => 15, // 元々60 → 15に縮小
+          getSize: () => 60,
           billboard: true
         });
       }
@@ -86,7 +86,7 @@
             const lats = coords.map(p => p[1]);
             const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
             const avgLat = lats.reduce((a, b) => a + b) / lats.length;
-            return { position: [avgLng, avgLat, 3000] }; // 上空へ
+            return { position: [avgLng, avgLat, 1000] };
           });
 
           const tileLayer = new deck.TileLayer({
