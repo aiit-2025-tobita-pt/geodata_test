@@ -54,7 +54,7 @@
             const lats = coords.map(p => p[1]);
             const avgLng = lngs.reduce((a, b) => a + b) / lngs.length;
             const avgLat = lats.reduce((a, b) => a + b) / lats.length;
-            return { position: [avgLng, avgLat, 7000] };
+            return { position: [avgLng, avgLat, 10000] };
           });
 
           const tileLayer = new deck.TileLayer({
