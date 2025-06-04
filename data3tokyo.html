@@ -27,7 +27,7 @@
         return new deck.IconLayer({
           id: 'co2-icons',
           data: co2Data,
-          iconAtlas: ICON_URL,
+          iconAtlas: ICON_URL + '?v=' + Date.now()
           iconMapping: iconMapping,
           getIcon: () => 'co2',
           sizeScale: scale * 0.5, // さらに小さく
